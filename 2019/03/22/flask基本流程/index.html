@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="Caelansar">
 <meta property="og:description" content="一、WSGI程序在分析flask的启动流程之前，我们有必要了解一些web程序的基础——WSGI。flask的核心Werkzeug是一个WSGI工具库，WSIGI(Python Web Server Gateway Interface)是为了让web服务器与python程序能够进行数据交流而定义的一套接口标准。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-03-22T07:31:45.036Z">
+<meta property="og:updated_time" content="2019-03-22T10:11:34.914Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="flask基本流程">
 <meta name="twitter:description" content="一、WSGI程序在分析flask的启动流程之前，我们有必要了解一些web程序的基础——WSGI。flask的核心Werkzeug是一个WSGI工具库，WSIGI(Python Web Server Gateway Interface)是为了让web服务器与python程序能够进行数据交流而定义的一套接口标准。">
@@ -359,7 +359,7 @@
 <p>WSGI服务器启动后会监听传入主机对应的端口，当收到请求时，会把请求报文解析成一个environ字典，然后调用可调用对象，将environ、start_response作为参数传入。</p>
 <p>运行该程序，在浏览器输入localhost:5000后便能看见一行’hello world’。</p>
 <p>Gunicorn、uWSGI等都是实现了WSGI规范的服务器，正是因为遵循了统一的规范，所以这些服务器都可以运行flask程序。</p>
-<h3 id="二、lask的工作流程"><a href="#二、lask的工作流程" class="headerlink" title="二、lask的工作流程"></a>二、lask的工作流程</h3><h4 id="1-程序启动"><a href="#1-程序启动" class="headerlink" title="1.程序启动"></a>1.程序启动</h4><p>flask提供了两种启动服务器的方式：</p>
+<h3 id="二、flask的工作流程"><a href="#二、flask的工作流程" class="headerlink" title="二、flask的工作流程"></a>二、flask的工作流程</h3><h4 id="1-程序启动"><a href="#1-程序启动" class="headerlink" title="1.程序启动"></a>1.程序启动</h4><p>flask提供了两种启动服务器的方式：</p>
 <ol>
 <li>命令行中输入flask run（实际调用flask.cli.run_command()）</li>
 <li>调用flask.Flask.run()方法</li>
@@ -552,7 +552,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、WSGI程序"><span class="nav-number">1.</span> <span class="nav-text">一、WSGI程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、lask的工作流程"><span class="nav-number">2.</span> <span class="nav-text">二、lask的工作流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-程序启动"><span class="nav-number">2.1.</span> <span class="nav-text">1.程序启动</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-请求和响应"><span class="nav-number">2.2.</span> <span class="nav-text">2.请求和响应</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、WSGI程序"><span class="nav-number">1.</span> <span class="nav-text">一、WSGI程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、flask的工作流程"><span class="nav-number">2.</span> <span class="nav-text">二、flask的工作流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-程序启动"><span class="nav-number">2.1.</span> <span class="nav-text">1.程序启动</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-请求和响应"><span class="nav-number">2.2.</span> <span class="nav-text">2.请求和响应</span></a></li></ol></li></ol></div>
             
 
           </div>
