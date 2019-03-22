@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="python,scraoy,爬虫,">
+  <meta name="keywords" content="python,爬虫,scraoy,">
 
 
 
@@ -80,7 +80,7 @@
 
 
 <meta name="description" content="一、准备工作1.安装splash在windows环境下，splash可通过docker进行安装，安装方法在 这篇文章 中有详细讲解，在此不再赘述。 安装完成后在powershell中运行以下命令安装splash： 12#从docker hub下载相关镜像文件docker pull scrapinghub/splash、">
-<meta name="keywords" content="python,scraoy,爬虫">
+<meta name="keywords" content="python,爬虫,scraoy">
 <meta property="og:type" content="article">
 <meta property="og:title" content="scrapy抓取动态页面">
 <meta property="og:url" content="http://yoursite.com/2019/03/21/scrapy抓取动态页面/index.html">
@@ -348,10 +348,10 @@
       
         <h3 id="一、准备工作"><a href="#一、准备工作" class="headerlink" title="一、准备工作"></a>一、准备工作</h3><h4 id="1-安装splash"><a href="#1-安装splash" class="headerlink" title="1.安装splash"></a>1.安装splash</h4><p>在windows环境下，splash可通过docker进行安装，安装方法在<a href="https://www.jianshu.com/p/490884917c4d" target="_blank" rel="noopener"> 这篇文章 </a>中有详细讲解，在此不再赘述。</p>
 <p>安装完成后在<code>powershell</code>中运行以下命令安装splash：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">从docker hub下载相关镜像文件</span></span><br><span class="line">docker pull scrapinghub/splash、</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>从docker hub下载相关镜像文件</span><br><span class="line">docker pull scrapinghub/splash、</span><br></pre></td></tr></table></figure>
 <a id="more"></a>
 <p>使用<code>docker</code>启动服务命令启动Splash服务，在8050、8051、5023端口开启splash服务：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">启动splash服务，并通过http，https，telnet提供服务</span></span><br><span class="line"><span class="meta">#</span><span class="bash">通常一般使用http模式 ，可以只启动一个8050就好  </span></span><br><span class="line"><span class="meta">#</span><span class="bash">Splash 将运行在 0.0.0.0 at ports 8050 (http), 8051 (https) and 5023 (telnet).</span></span><br><span class="line">docker run -p 5023:5023 -p 8050:8050 -p 8051:8051 scrapinghub/splash</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>启动splash服务，并通过http，https，telnet提供服务</span><br><span class="line"><span class="meta">#</span>通常一般使用http模式 ，可以只启动一个8050就好  </span><br><span class="line"><span class="meta">#</span>Splash 将运行在 0.0.0.0 at ports 8050 (http), 8051 (https) and 5023 (telnet).</span><br><span class="line">docker run -p 5023:5023 -p 8050:8050 -p 8051:8051 scrapinghub/splash</span><br></pre></td></tr></table></figure>
 <p>在浏览器中输入localhost:8050查看服务启动情况：</p>
 <p><img src="https:////upload-images.jianshu.io/upload_images/7303256-59cb1007b989170f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1000/format/webp" alt="img"></p>
 <h4 id="2-安装scrapy-splash"><a href="#2-安装scrapy-splash" class="headerlink" title="2.安装scrapy-splash"></a>2.安装scrapy-splash</h4><p>使用pip安装scrapy-splash：</p>
@@ -384,9 +384,9 @@
           
             <a href="/tags/python/" rel="tag"># python</a>
           
-            <a href="/tags/scraoy/" rel="tag"># scraoy</a>
-          
             <a href="/tags/爬虫/" rel="tag"># 爬虫</a>
+          
+            <a href="/tags/scraoy/" rel="tag"># scraoy</a>
           
         </div>
       
@@ -408,6 +408,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/22/flask基本流程/" rel="prev" title="flask基本流程">
+                flask基本流程 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -486,7 +490,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -508,7 +512,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
