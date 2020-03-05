@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="go," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="现象最近使用bytes.Buffer的过程中发现了一个有意思的问题 12345678var b bytes.Bufferb.WriteString(&quot;hello&quot;)var val &#x3D; b.Bytes()t.Log(string(val))   &#x2F;&#x2F; hellob.Reset()b.WriteString(&quot;bye&quot;)t.Log(string(val))">
+<meta property="og:type" content="article">
+<meta property="og:title" content="简单说说golang中的string">
+<meta property="og:url" content="http://yoursite.com/2023/03/05/%E7%AE%80%E5%8D%95%E8%AF%B4%E8%AF%B4golang%E4%B8%AD%E7%9A%84string/index.html">
+<meta property="og:site_name" content="Caelansar">
+<meta property="og:description" content="现象最近使用bytes.Buffer的过程中发现了一个有意思的问题 12345678var b bytes.Bufferb.WriteString(&quot;hello&quot;)var val &#x3D; b.Bytes()t.Log(string(val))   &#x2F;&#x2F; hellob.Reset()b.WriteString(&quot;bye&quot;)t.Log(string(val))">
+<meta property="og:locale">
+<meta property="article:published_time" content="2023-03-05T13:21:17.000Z">
+<meta property="article:modified_time" content="2020-03-05T13:25:10.349Z">
+<meta property="article:author" content="Caelansar">
+<meta property="article:tag" content="go">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2023/03/05/简单说说golang中的string/"/>
+
+
+
+
+
+  <title>简单说说golang中的string | Caelansar</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Caelansar</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2023/03/05/%E7%AE%80%E5%8D%95%E8%AF%B4%E8%AF%B4golang%E4%B8%AD%E7%9A%84string/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/img.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Caelansar">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">简单说说golang中的string</h1>
+        
+
+        <div class="post-meta">
+            
+
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2023-03-05T21:21:17+08:00">
+                2023-03-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/golang/" itemprop="url" rel="index">
+                    <span itemprop="name">golang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="现象"><a href="#现象" class="headerlink" title="现象"></a>现象</h3><p>最近使用bytes.Buffer的过程中发现了一个有意思的问题</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> b bytes.Buffer</span><br><span class="line">b.WriteString(<span class="string">&quot;hello&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> val = b.Bytes()</span><br><span class="line">t.Log(<span class="keyword">string</span>(val))   <span class="comment">// hello</span></span><br><span class="line">b.Reset()</span><br><span class="line">b.WriteString(<span class="string">&quot;bye&quot;</span>)</span><br><span class="line">t.Log(<span class="keyword">string</span>(val))   <span class="comment">//byelo</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+
+<p>在对<code>bytes.Buffer</code>进行<code>Reset</code>操作后，依然还可以影响到之前的数据。如果改为用<code>String</code>方法：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> b bytes.Buffer</span><br><span class="line">b.WriteString(<span class="string">&quot;hello&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> val = b.String()</span><br><span class="line">t.Log(val)           <span class="comment">// hello</span></span><br><span class="line">b.Reset()</span><br><span class="line">b.WriteString(<span class="string">&quot;bye&quot;</span>)</span><br><span class="line">t.Log(val)           <span class="comment">// hello</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>首先看看String和Bytes方法的定义</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *Buffer)</span> <span class="title">Bytes</span><span class="params">()</span> []<span class="title">byte</span></span> &#123; <span class="keyword">return</span> b.buf[b.off:] &#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *Buffer)</span> <span class="title">String</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">   <span class="keyword">if</span> b == <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="string">&quot;&lt;nil&gt;&quot;</span></span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> <span class="keyword">string</span>(b.buf[b.off:])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>抛开处理nil情况的分支，其实只是进行了一次将[]byte转换为string的操作，仅仅多了这一次转换，就能造成结果的不同吗？</p>
+<p>要弄懂原因，首先要看<code>Reset</code>方法到底reset了什么</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Reset resets the buffer to be empty,</span></span><br><span class="line"><span class="comment">// but it retains the underlying storage for use by future writes.</span></span><br><span class="line"><span class="comment">// Reset is the same as Truncate(0).</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *Buffer)</span> <span class="title">Reset</span><span class="params">()</span></span> &#123;</span><br><span class="line">	b.buf = b.buf[:<span class="number">0</span>]</span><br><span class="line">	b.off = <span class="number">0</span></span><br><span class="line">	b.lastRead = opInvalid</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从代码和注释可以了解到，<code>Reset</code>方法只会将内部<code>b.buf</code>进行re-slice，reset后依旧是复用同一个底层数组</p>
+<p>string 和 slice 在运行时的数据结构表示如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> StringHeader <span class="keyword">struct</span> &#123;</span><br><span class="line">   Data <span class="keyword">uintptr</span></span><br><span class="line">   Len  <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> SliceHeader <span class="keyword">struct</span> &#123;</span><br><span class="line">   Data <span class="keyword">uintptr</span></span><br><span class="line">   Len  <span class="keyword">int</span></span><br><span class="line">   Cap  <span class="keyword">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>与slice相比，string结构中没有表示容量的<code>Cap</code>字段，这是由于golang中的string是<strong>不可变</strong>的，golang不支持直接修改string类型变量的内存空间，只能通过改变string类型变量指向的内存空间来达成“修改”内容的目的。即，<code>runtime.stringStruct</code>中的<code>str</code>指针针指向的内容是<strong>不可改变</strong>的，但指针本身<strong>可以改变</strong></p>
+<p>当我们通过<code>string([]byte)</code>将[]byte转换为string时， 背后将调用<code>runtime.slicebytetostring</code> 函数，该函数会根据传入缓冲区的大小决定是否要分配一个新的内存空间，<code>runtime.stringStructOf</code> 会将字符串指针转化为<code>runtime.stringStruct</code>结构体指针，再设置了字符串指针p和长度n之后调用<code>memmove</code>将原[]byte中的字节copy到新的内存中</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">slicebytetostring</span><span class="params">(buf *tmpBuf, ptr *<span class="keyword">byte</span>, n <span class="keyword">int</span>)</span> <span class="params">(str <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> n == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> raceenabled &#123;</span><br><span class="line">		racereadrangepc(unsafe.Pointer(ptr),</span><br><span class="line">			<span class="keyword">uintptr</span>(n),</span><br><span class="line">			getcallerpc(),</span><br><span class="line">			abi.FuncPCABIInternal(slicebytetostring))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> msanenabled &#123;</span><br><span class="line">		msanread(unsafe.Pointer(ptr), <span class="keyword">uintptr</span>(n))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> asanenabled &#123;</span><br><span class="line">		asanread(unsafe.Pointer(ptr), <span class="keyword">uintptr</span>(n))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> n == <span class="number">1</span> &#123;</span><br><span class="line">		p := unsafe.Pointer(&amp;staticuint64s[*ptr])</span><br><span class="line">		<span class="keyword">if</span> goarch.BigEndian &#123;</span><br><span class="line">			p = add(p, <span class="number">7</span>)</span><br><span class="line">		&#125;</span><br><span class="line">		stringStructOf(&amp;str).str = p</span><br><span class="line">		stringStructOf(&amp;str).<span class="built_in">len</span> = <span class="number">1</span></span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> p unsafe.Pointer</span><br><span class="line">	<span class="keyword">if</span> buf != <span class="literal">nil</span> &amp;&amp; n &lt;= <span class="built_in">len</span>(buf) &#123;</span><br><span class="line">		p = unsafe.Pointer(buf)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		p = mallocgc(<span class="keyword">uintptr</span>(n), <span class="literal">nil</span>, <span class="literal">false</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	stringStructOf(&amp;str).str = p</span><br><span class="line">	stringStructOf(&amp;str).<span class="built_in">len</span> = n</span><br><span class="line">	memmove(p, unsafe.Pointer(ptr), <span class="keyword">uintptr</span>(n))</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以Buffer.String方法实际上进行了一次Copy操作，因此之后对底层数组的修改并不会反映在其之上</p>
+<h3 id="strings-Builder"><a href="#strings-Builder" class="headerlink" title="strings.Builder"></a>strings.Builder</h3><p>如果不想在[]byte转换为string时进行额外的内存分配，可以使用<code>strings.Builder</code>，<code>strings.Builder</code>和<code>bytes.Buffer</code>的底层实现基本类似，两者差别主要是<code>String</code> / <code>Reset</code>方法:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *Builder)</span> <span class="title">String</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> *(*<span class="keyword">string</span>)(unsafe.Pointer(&amp;b.buf))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>String</code>方法使用指针操作，丢弃<code>SliceHeader</code>结构的<code>Cap</code>字段，将这一块内存布局解释为<code>StringHeader</code>，因此不会有额外内存分配</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *Builder)</span> <span class="title">Reset</span><span class="params">()</span></span> &#123;</span><br><span class="line">   b.addr = <span class="literal">nil</span></span><br><span class="line">   b.buf = <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Reset</code>方法将<code>b.buf</code>置为空，因此reset之后新的写入操作并不是对同一片地址。这也是和<code>bytes.Buffer</code>的不同之处</p>
+<p>和<code>bytes.Buffer</code>相比，<code>string.Builer</code>还有一个限制：为了保证共用buf导致的底层数组污染，<code>strings.Builder</code> 在<code>Grow</code>/ <code>Write</code> / <code>WriteRune</code> / <code>WriteString</code> 这几个方法中添加了<strong>禁止copy</strong>的限制</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *Builder)</span> <span class="title">copyCheck</span><span class="params">()</span></span> &#123;</span><br><span class="line">   <span class="keyword">if</span> b.addr == <span class="literal">nil</span> &#123;</span><br><span class="line">      b.addr = (*Builder)(noescape(unsafe.Pointer(b)))</span><br><span class="line">   &#125; <span class="keyword">else</span> <span class="keyword">if</span> b.addr != b &#123;</span><br><span class="line">      <span class="built_in">panic</span>(<span class="string">&quot;strings: illegal use of non-zero Builder copied by value&quot;</span>)</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> b1 strings.Builder</span><br><span class="line">b1.WriteString(<span class="string">&quot;hello&quot;</span>)</span><br><span class="line">b2 := b1</span><br><span class="line">b2.WriteString(<span class="string">&quot;bye&quot;</span>) <span class="comment">// panic: strings: illegal use of non-zero Builder copied by value</span></span><br></pre></td></tr></table></figure>
+
+<p>但如果复制后的结构在写入前先进行了<code>Reset</code>操作，则调用Write相关方法也不会panic。因为此时buf已被设置为nil，相关的写入操作已无法对其他结构体中的buf造成影响</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> b1 strings.Builder</span><br><span class="line">b1.WriteString(<span class="string">&quot;hello&quot;</span>)</span><br><span class="line">b2 := b1</span><br><span class="line">fmt.Println(b2.Len())    <span class="comment">// 5</span></span><br><span class="line">fmt.Println(b2.String()) <span class="comment">// hello</span></span><br><span class="line">b2.Reset()</span><br><span class="line">b2.WriteString(<span class="string">&quot;bye&quot;</span>)</span><br><span class="line">fmt.Println(b2.String()) <span class="comment">// bye</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/go/" rel="tag"># go</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/02/26/golang-http%E4%B8%AD%E7%9A%84context/" rel="next" title="golang http中的context">
+                <i class="fa fa-chevron-left"></i> golang http中的context
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/img.png"
+                alt="" />
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%B0%E8%B1%A1"><span class="nav-number">1.</span> <span class="nav-text">现象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#strings-Builder"><span class="nav-number">3.</span> <span class="nav-text">strings.Builder</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Caelansar</span>
+
+  
+</div>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
