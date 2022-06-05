@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="dns," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="The Domain Name System (DNS) is the hierarchical and decentralized naming system used to identify computers reachable through the Internet or other Internet Protocol networks.  本文是实现一个dns服务器的第一章，实现一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实现一个dns服务器 -- 1.协议概览">
+<meta property="og:url" content="http://yoursite.com/2022/06/05/%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAdns%E6%9C%8D%E5%8A%A1%E5%99%A8%20--%201.%E5%8D%8F%E8%AE%AE%E6%A6%82%E8%A7%88/index.html">
+<meta property="og:site_name" content="Caelansar">
+<meta property="og:description" content="The Domain Name System (DNS) is the hierarchical and decentralized naming system used to identify computers reachable through the Internet or other Internet Protocol networks.  本文是实现一个dns服务器的第一章，实现一个">
+<meta property="og:locale">
+<meta property="article:published_time" content="2022-06-05T13:17:49.000Z">
+<meta property="article:modified_time" content="2022-06-05T12:40:34.461Z">
+<meta property="article:author" content="Caelansar">
+<meta property="article:tag" content="dns">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2022/06/05/实现一个dns服务器 -- 1.协议概览/"/>
+
+
+
+
+
+  <title>实现一个dns服务器 -- 1.协议概览 | Caelansar</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Caelansar</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2022/06/05/%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAdns%E6%9C%8D%E5%8A%A1%E5%99%A8%20--%201.%E5%8D%8F%E8%AE%AE%E6%A6%82%E8%A7%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/img.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Caelansar">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">实现一个dns服务器 -- 1.协议概览</h1>
+        
+
+        <div class="post-meta">
+            
+
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2022-06-05T21:17:49+08:00">
+                2022-06-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/dns/" itemprop="url" rel="index">
+                    <span itemprop="name">dns</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>The Domain Name System (DNS) is the hierarchical and decentralized naming system used to identify computers reachable through the Internet or other Internet Protocol networks.</p>
+</blockquote>
+<p>本文是实现一个dns服务器的第一章，实现一个dns服务器系列文章将从研究 DNS 协议开始，一步步实现一个简单的DNS server</p>
+<span id="more"></span>
+
+<h3 id="一、协议"><a href="#一、协议" class="headerlink" title="一、协议"></a>一、协议</h3><p>我们将从研究 DNS 协议开始，并使用我们的知识来实现一个简单的客户端。<br>DNS 的查询和响应具有相同的格式，数据包如下所示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">+--------+------------------+------------------+-------------------+--------------------+</span><br><span class="line">|Header  | Question Section |  Answer Section  | Authority Section | Additional Section |</span><br><span class="line">+--------+------------------+------------------+-------------------+--------------------+</span><br><span class="line">|12 bytes|    Variable      |    Variable      |    Variable       |     Variable       |</span><br><span class="line">+--------+------------------+------------------+-------------------+--------------------+</span><br></pre></td></tr></table></figure>
+
+<p><code>Header</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                      ID                       |</span><br><span class="line">+--+-----------+--+--+--+--+--+--+--+-----------+</span><br><span class="line">|QR|   Opcode  |AA|TC|RD|RA| Z|AD|CD|   RCODE   |</span><br><span class="line">+--+-----------+--+--+--+--+--+--+--+-----------+</span><br><span class="line">|                    QDCOUNT                    |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    ANCOUNT                    |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    NSCOUNT                    |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    ARCOUNT                    |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>ID</code>: 16bit，一个随机的标识符被分配给查询数据包。响应数据包必须以相同的ID进行回复。由于UDP的无状态性质，需要这样来区分不同响应</li>
+<li><code>QR</code>：1 bit，0 表示查询报文，1 表示响应报文</li>
+<li><code>OPCODE</code>：4 bit，通常值为 0（标准查询），其他值为 1（反向查询）和 2（服务器状态请求），更多细节参考<a target="_blank" rel="noopener" href="https://datatracker.ietf.org/doc/html/rfc1035">RFC1035</a></li>
+<li><code>AA</code>：1 bit，授权回答（Authoritative Answer），如果响应服务器拥有被查询的域，则设置为 1</li>
+<li><code>TC</code>：1 bit，可截断（Truncated Message）。使用 UDP 时，表示当响应总长度超过 512 bytes 时，只返回 512 bytes</li>
+<li><code>RD</code>：1 bit，期望递归（Recursion Desired）。如果为1，表示DNS服务器必须处理这个查询，即这是一个递归查询；如果设置为 0，说明这是一个迭代查询</li>
+<li><code>RA</code>：1 bit，可用递归（Recursion Available）。表示DNS服务器是否支持递归查询</li>
+<li>Z：1 bit，保留字段（Zero），固定为0 ；</li>
+<li>AD: 1 bit，认证数据（Authenticated Data），表示响应是否经过<a target="_blank" rel="noopener" href="https://zh.m.wikipedia.org/zh-hans/%E5%9F%9F%E5%90%8D%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8%E6%89%A9%E5%B1%95">DNSSEC</a>验证</li>
+<li>CD: 1 bit，关闭检查（Checking Disable），同样和DNSSEC有关，表示是否禁用安全检查</li>
+<li><code>RCODE</code>：4 bit， 表示返回值，0表示没有错误</li>
+</ul>
+<p><code>Question Section</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">  0  1  2  3  4  5  6  7  0  1  2  3  4  5  6  7</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    QNAME                      |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    QTYPE                      |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    QCLASS                     |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>QNAME</code> 表示查询域名</li>
+<li><code>QTYPE</code> 2 bytes，表示查询的协议类型</li>
+<li><code>QCLASS</code> 2 bytes，表示查询的类。比如，<code>IN</code>代表Internet</li>
+</ul>
+<p><code>Answer Section</code>/<code>Authority Section</code>/<code>Additional Section</code></p>
+<p>这三个字段格式一样</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">  0  1  2  3  4  5  6  7  0  1  2  3  4  5  6  7</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    NAME                       |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    TYPE                       |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    CLASS                      |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    TTL                        |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    RDLENGTH                   |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">|                    RDATA                      |</span><br><span class="line">+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>NAME</code> 资源记录包含的域名</li>
+<li><code>TYPE</code> 2 bytes，表示<code>DNS</code>协议的类型</li>
+<li><code>CLASS</code> 2 bytes，表示RDATA的类</li>
+<li><code>TTL</code> 4 bytes，表示资源记录可以缓存的时间。0代表只能被传输，但是不能被缓存</li>
+<li><code>RDLENGTH</code> 2 bytes，表示RDATA的长度</li>
+<li><code>RDATA</code> 不定长字符串，表示记录，格式和TYPE/CLASS有关。比如，TYPE是A，CLASS 是 IN，那么RDATA就是一个4个字节的ARPA网络地址</li>
+</ul>
+<p>理论部分讲完，让我们使用dig工具在实际中感受一下DNS查询</p>
+<p>我们可以使用<a target="_blank" rel="noopener" href="https://zh.m.wikipedia.org/zh/Netcat">netcat</a> 命令监听一个端口：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ nc -u -l 1053 &gt; query_packet.txt</span><br></pre></td></tr></table></figure>
+
+<p>然后新建一个终端，使用dig命令往这个端口发送一个DNS查询</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ dig +retry=0 -p 1053 @127.0.0.1 +noedns baidu.com</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.10.6 &lt;&lt;&gt;&gt; +retry=0 -p 1053 @127.0.0.1 +noedns baidu.com</span><br><span class="line">; (1 server found)</span><br><span class="line">;; global options: +cmd</span><br><span class="line">;; connection timed out; no servers could be reached</span><br></pre></td></tr></table></figure>
+
+<p>由于这个端口不会有任何响应，所以这个DNS查询会以timed out告终，这是符合预期的。当收到这个失败信息后，就可以在第一个终端使用Ctrl+C退出<code>netcat</code>监听。通过这上面的操作，我们得到了 <code>query_packet.txt</code> 文件，可以通过这个文件来进行一次真实的DNS请求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ nc -u 8.8.8.8 53 &lt; query_packet.txt &gt; response_packet.txt</span><br></pre></td></tr></table></figure>
+
+<p>上面这条命令使用<code>8.8.8.8:53</code>进行DNS查询，<code>8.8.8.8</code>是Google提供的免费DNS服务器的IP地址<br>执行后等待一会儿输入Ctrl+C退出，这样就得到了response的报文，可以使用<a target="_blank" rel="noopener" href="https://www.tutorialspoint.com/unix_commands/xxd.htm">xxd</a>命令将两份txt文件转为二进制格式:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ xxd -b query_packet.txt</span><br><span class="line">00000000: 01110010 01101011 00000001 00100000 00000000 00000001  rk. ..</span><br><span class="line">00000006: 00000000 00000000 00000000 00000000 00000000 00000000  ......</span><br><span class="line">0000000c: 00000101 01100010 01100001 01101001 01100100 01110101  .baidu</span><br><span class="line">00000012: 00000011 01100011 01101111 01101101 00000000 00000000  .com..</span><br><span class="line">00000018: 00000001 00000000 00000001                             ...</span><br><span class="line"></span><br><span class="line">$ xxd -b response_packet.txt</span><br><span class="line">00000000: 01110010 01101011 10000001 10000000 00000000 00000001  rk....</span><br><span class="line">00000006: 00000000 00000010 00000000 00000000 00000000 00000000  ......</span><br><span class="line">0000000c: 00000101 01100010 01100001 01101001 01100100 01110101  .baidu</span><br><span class="line">00000012: 00000011 01100011 01101111 01101101 00000000 00000000  .com..</span><br><span class="line">00000018: 00000001 00000000 00000001 11000000 00001100 00000000  ......</span><br><span class="line">0000001e: 00000001 00000000 00000001 00000000 00000000 00000000  ......</span><br><span class="line">00000024: 10110010 00000000 00000100 11011100 10110101 00100110  .....&amp;</span><br><span class="line">0000002a: 10010100 11000000 00001100 00000000 00000001 00000000  ......</span><br><span class="line">00000030: 00000001 00000000 00000000 00000000 10110010 00000000  ......</span><br><span class="line">00000036: 00000100 11011100 10110101 00100110 11111011           ...&amp;.</span><br></pre></td></tr></table></figure>
+
+<p>下面对请求和响应报文进行分析</p>
+<ol>
+<li><p>Query Packet</p>
+<p>之前提到过，<code>Header</code>长度为12 bytes，对应<code>01110010 01101011 00000001 00100000 00000000 00000001 00000000 00000000 00000000 00000000 00000000 00000000</code>，前16 bits表示ID，对应十进制为29291，这是DNS请求的唯一标识别，请求和响应的ID应该相同，之后的16 bits对应以下内容:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">0 0 0 0 0 0 0 1  0 0 1 0 0 0 0 0</span><br><span class="line">- -+-+-+- - - -  - -+-+- -+-+-+-</span><br><span class="line">Q    O    A T R  R Z A C    R</span><br><span class="line">R    P    A C D  A   D D    C</span><br><span class="line">     C                      O</span><br><span class="line">     O                      D</span><br><span class="line">     D                      E</span><br><span class="line">     E</span><br></pre></td></tr></table></figure>
+
+<p><code>QR</code>是0，表示它是一个查询报文，<code>OPCODE</code>也是0，因为它是一个标准查询，<code>AA</code>、<code>TC</code>和<code>RA</code>标志与查询无关，而<code>RD</code>为1，因为dig默认为请求递归查询。最后的<code>RCODE</code>也和查询无关</p>
+<p>最后剩下的8 bytes表示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">00000000 00000001 00000000 00000000 00000000 00000000 00000000 00000000</span><br><span class="line">-+-+-+-+-+-+-+-+- -+-+-+-+-+-+-+-+- -+-+-+-+-+-+-+-+- -+-+-+-+-+-+-+-+-</span><br><span class="line">    QDCOUNT           ANCOUNT            NSCOUNT           ARCOUNT</span><br></pre></td></tr></table></figure>
+
+<p><code>Header</code>部分解析完成，之后来到了<code>Question Section</code>，为方便查看，先将<code>00000101 01100010 01100001 01101001 01100100 01110101 00000011 01100011 01101111 01101101 00000000 00000000 00000001 00000000 00000001</code> 转为16进制表示 <code>05 62 61 69 64 75 03 63 6f 6d 00 00 01 00 01</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">                    query name           type   class</span><br><span class="line">       --------------------------------  -----  -----</span><br><span class="line">HEX    05 62 61 69 64 75 03 63 6f 6d 00  00 01  00 01</span><br><span class="line">ASCII     b  a  i  d  u     c  o  m</span><br><span class="line">DEC    5                 3           0       1      1</span><br></pre></td></tr></table></figure>
+
+<p>正如前文所述，<code>Question Section</code>由三部分组成：query name、type和class。query name的编码方式并没有通过<code>.</code>进行分隔，而是将每个名称编码为一串标签（label），每个标签前有一个表示其长度的单字节。在上面的例子中，<code>baidu</code>是5个字节，因此前面是<code>00000101</code>，而 <code>com</code> 是3个字节，前面是<code>00000011</code>。最后，所有的query name都以一个零长度的标签结束，也就是一个空字节</p>
+</li>
+<li><p>Response Packet</p>
+<p>由于query和response报文结构相同，所以前12位也是<code>Header</code>，可以看到，前16 bits（<code>01110010 01101011</code>）和query中一致，这也印证了<strong>请求和响应的ID必须相同</strong>这一说法。再看之后16 bits的内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1 0 0 0 0 0 0 1  1 0 0 0 0 0 0 0</span><br><span class="line">- -+-+-+- - - -  - -+-+- -+-+-+-</span><br><span class="line">Q    O    A T R  R Z A C    R</span><br><span class="line">R    P    A C D  A   D D    C</span><br><span class="line">     C                      O</span><br><span class="line">     O                      D</span><br><span class="line">     D                      E</span><br><span class="line">     E</span><br></pre></td></tr></table></figure>
+
+<p>由于这是一个响应，所以<code>QR</code>被设置为1，<code>RA</code>表示服务器支持递归，再看看之后的8 bytes数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">00000000 00000001 00000000 00000010 00000000 00000000 00000000 00000000</span><br><span class="line">-+-+-+-+-+-+-+-+- -+-+-+-+-+-+-+-+- -+-+-+-+-+-+-+-+- -+-+-+-+-+-+-+-+-</span><br><span class="line">    QDCOUNT           ANCOUNT            NSCOUNT           ARCOUNT</span><br></pre></td></tr></table></figure>
+
+<p>跳过和query packet中相同的<code>Question Section</code>部分，我们来到了<code>Answer Section</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">11000000 00001100 00000000 00000001 00000000 00000001 </span><br><span class="line">00000000 00000000 00000000 10110010 00000000 00000100 </span><br><span class="line">11011100 10110101 00100110 10010100 </span><br><span class="line">11000000 00001100 00000000 00000001 00000000 00000001</span><br><span class="line">00000000 00000000 00000000 10110010 00000000 00000100 </span><br><span class="line">11011100 10110101 00100110 11111011</span><br></pre></td></tr></table></figure>
+
+<p>按照我们之前解析<code>Question Section</code>的经验，name会将每个名称编码为一串标签，每个标签前有一个表示其长度的单字节，<code>11000000</code>转为10进制之后是192，但显然之后数据长度不足192 bytes。那么是出了什么问题呢？这就涉及到了DNS压缩技术（<code>DNS Packet Compression</code>）</p>
+</li>
+<li><p>DNS Packet Compression</p>
+<p>在上面的例子，对于一个查询有两个answer，如果每个answer都包含完整的Name信息，对于这个例子还好，但随着answer数量增加，很快就会超过DNS UDP报文512 bytes的长度限制。DNS压缩通过标签提供的跳转指令，消除了域名在<code>NAME</code>、<code>QNAME</code>和<code>RDATA</code>字段中的重复</p>
+<p>所以可以把前文提到的<strong>标签</strong>分为两类：<strong>数据标签（data label）和压缩标签（compression label）</strong>。数据标签在解析Query Packet部分已做过说明，压缩标签则相当于一个指针，</p>
+<p>实现方式为：<strong>原本计数字节高两位设置为 1，剩余位与随后的一个 byte 组成一个 14 位的指针</strong>，即<strong>偏移量</strong>，给出距离距离 DNS 消息开始出的字节数，在那可找到一个用于替代压缩标签的数据标签，即压缩标签能够指向一个距离开始处多达 16384（<code>2^14</code>）个字节的位置</p>
+<p>具体到我们的例子，首先将<code>Answer Section</code>中的二进制转为16进制方便查看</p>
+<p><code>c0 0c 00 01 00 01 00 00 00 b2 00 04 dc b5 26 94 c0 0c 00 01 00 01 00 00 00 b2 00 04 dc b5 26 fb</code></p>
+<p>注意到<code>0xc00c</code>出现了两次，结合之前解析出的<code>ANCOUNT</code>为2，我们可以得出两个<code>ANSWER</code>都使用了压缩标签</p>
+<p>计数字节高两位设置为1后的16进制表示是<code>0xc000</code>（二进制<code>11000000 00000000</code>），所以我们可以通过用这个掩码对我们的两个字节进行xor来找到跳转的位置，<code>0xc00c</code> ^ <code>0xc000</code> = 12。因此，我们应该跳到数据包的第12 bytes，并从那里读取。回顾DNS头的长度恰好是12 bytes，可以推出我们需要从数据包的<code>Question Section</code>开始读取，因为这个例子中question是以domain开始（ <code>baidu.com</code>）。一旦我们完成了对name的读取，我们就在我们离开的地方继续解析，并进入到记录类型</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">      name     type   class         ttl        len      ip</span><br><span class="line">      ------  ------  ------  --------------  ------  --------------</span><br><span class="line">HEX   c0  0c  00  01  00  01  00  00  00  b2  00  04  dc  b5  26  94</span><br><span class="line">DEC   192 12    1       1           178         4     220 181 38 148</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">      name     type   class         ttl        len      ip</span><br><span class="line">      ------  ------  ------  --------------  ------  --------------</span><br><span class="line">HEX   c0  0c  00  01  00  01  00  00  00  b2  00  04  dc  b5  26  fb</span><br><span class="line">DEC   192 12    1       1           178         4     220 181 38 251</span><br></pre></td></tr></table></figure>
+
+<p>这样我们也就顺利完成了Response Packet的解析</p>
+</li>
+</ol>
+<h3 id="二、总结"><a href="#二、总结" class="headerlink" title="二、总结"></a>二、总结</h3><p>这一章节主要介绍了DNS协议的报文结构，并通过dig工具分析了一次完整的DNS请求过程。下一章将会开始编码，实现通过代码解析DNS报文的功能</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/dns/" rel="tag"># dns</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/06/04/%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAss%E5%AE%A2%E6%88%B7%E7%AB%AF/" rel="next" title="实现一个ss客户端">
+                <i class="fa fa-chevron-left"></i> 实现一个ss客户端
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/img.png"
+                alt="" />
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.</span> <span class="nav-text">一、协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%80%BB%E7%BB%93"><span class="nav-number">2.</span> <span class="nav-text">二、总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Caelansar</span>
+
+  
+</div>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
