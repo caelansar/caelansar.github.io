@@ -87,7 +87,7 @@
 <meta property="og:description" content="The Domain Name System (DNS) is the hierarchical and decentralized naming system used to identify computers reachable through the Internet or other Internet Protocol networks.  本文是实现一个dns服务器的第一章，实现一个">
 <meta property="og:locale">
 <meta property="article:published_time" content="2022-06-05T13:17:49.000Z">
-<meta property="article:modified_time" content="2022-06-05T12:40:34.461Z">
+<meta property="article:modified_time" content="2022-06-18T14:38:36.921Z">
 <meta property="article:author" content="Caelansar">
 <meta property="article:tag" content="dns">
 <meta name="twitter:card" content="summary">
@@ -430,7 +430,7 @@
 <p>按照我们之前解析<code>Question Section</code>的经验，name会将每个名称编码为一串标签，每个标签前有一个表示其长度的单字节，<code>11000000</code>转为10进制之后是192，但显然之后数据长度不足192 bytes。那么是出了什么问题呢？这就涉及到了DNS压缩技术（<code>DNS Packet Compression</code>）</p>
 </li>
 <li><p>DNS Packet Compression</p>
-<p>在上面的例子，对于一个查询有两个answer，如果每个answer都包含完整的Name信息，对于这个例子还好，但随着answer数量增加，很快就会超过DNS UDP报文512 bytes的长度限制。DNS压缩通过标签提供的跳转指令，消除了域名在<code>NAME</code>、<code>QNAME</code>和<code>RDATA</code>字段中的重复</p>
+<p>在上面的例子，对于一个查询有两个answer，如果每个answer都包含完整的Name信息，answer少的时候还好，但随着answer数量增加，很快就会超过DNS UDP报文512 bytes的长度限制。DNS压缩通过标签提供的跳转指令，消除了域名在<code>NAME</code>、<code>QNAME</code>和<code>RDATA</code>字段中的重复</p>
 <p>所以可以把前文提到的<strong>标签</strong>分为两类：<strong>数据标签（data label）和压缩标签（compression label）</strong>。数据标签在解析Query Packet部分已做过说明，压缩标签则相当于一个指针，</p>
 <p>实现方式为：<strong>原本计数字节高两位设置为 1，剩余位与随后的一个 byte 组成一个 14 位的指针</strong>，即<strong>偏移量</strong>，给出距离距离 DNS 消息开始出的字节数，在那可找到一个用于替代压缩标签的数据标签，即压缩标签能够指向一个距离开始处多达 16384（<code>2^14</code>）个字节的位置</p>
 <p>具体到我们的例子，首先将<code>Answer Section</code>中的二进制转为16进制方便查看</p>
