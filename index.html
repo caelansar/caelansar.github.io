@@ -554,6 +554,155 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2023/03/26/%E4%BD%BF%E7%94%A8lldb%E6%8E%A2%E7%B4%A2trait-object%E7%9A%84%E7%BB%93%E6%9E%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/img.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Caelansar">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/03/26/%E4%BD%BF%E7%94%A8lldb%E6%8E%A2%E7%B4%A2trait-object%E7%9A%84%E7%BB%93%E6%9E%84/" itemprop="url">使用lldb探索trait object的结构</a></h1>
+        
+
+        <div class="post-meta">
+            
+
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2023-03-26T13:41:32+08:00">
+                2023-03-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/rust/" itemprop="url" rel="index">
+                    <span itemprop="name">rust</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="trait-object"><a href="#trait-object" class="headerlink" title="trait object"></a>trait object</h3><p>rust中支持了静态派发(static dispatch)和动态派发(dynamic dispatch)两种方式</p>
+<p>静态派发指的是具体调的函数，在<strong>编译</strong>阶段就能确定下来，静态派发通过泛型来完成。对于不同的泛型类型参数，编译器通过单态化(monomorphization)生成不同的函数实现，在编译阶段就确定了应该调用哪个函数。动态派发指的是具体调用哪个函数，在<strong>执行</strong>阶段才能确定。它通过 trait object 来完成。trait object类似golang中的interface，本质上是个胖指针，它可以指向不同的类型，从而动态地选择调用的方法</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2023/03/26/%E4%BD%BF%E7%94%A8lldb%E6%8E%A2%E7%B4%A2trait-object%E7%9A%84%E7%BB%93%E6%9E%84/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2023/03/05/%E7%AE%80%E5%8D%95%E8%AF%B4%E8%AF%B4golang%E4%B8%AD%E7%9A%84string/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1585,154 +1734,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/10/07/rust%20if%20%E8%AF%AD%E5%8F%A5%E6%8F%90%E5%89%8D%E8%BF%94%E5%9B%9E/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/img.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Caelansar">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/10/07/rust%20if%20%E8%AF%AD%E5%8F%A5%E6%8F%90%E5%89%8D%E8%BF%94%E5%9B%9E/" itemprop="url">rust if 语句提前返回</a></h1>
-        
-
-        <div class="post-meta">
-            
-
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-10-07T10:40:29+08:00">
-                2021-10-07
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/rust/" itemprop="url" rel="index">
-                    <span itemprop="name">rust</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>假设有如下代码，max是一个求最大值的函数，这在其他语言中很常见，但在rust中却无法通过编译</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/10/07/rust%20if%20%E8%AF%AD%E5%8F%A5%E6%8F%90%E5%89%8D%E8%BF%94%E5%9B%9E/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1787,7 +1788,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-count">18</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1846,7 +1847,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
