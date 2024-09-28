@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="rust," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="初看axum 时，对于它的示例代码惊为天人：一个静态强类型语言竟然可以做出比肩动态语言的效果，可以写出如此灵活，且做了严格类型检查的代码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rust的魔法参数">
+<meta property="og:url" content="http://yoursite.com/2024/08/24/rust%E7%9A%84%E9%AD%94%E6%B3%95%E5%8F%82%E6%95%B0/index.html">
+<meta property="og:site_name" content="Caelansar">
+<meta property="og:description" content="初看axum 时，对于它的示例代码惊为天人：一个静态强类型语言竟然可以做出比肩动态语言的效果，可以写出如此灵活，且做了严格类型检查的代码">
+<meta property="og:locale">
+<meta property="article:published_time" content="2024-08-24T07:21:17.000Z">
+<meta property="article:modified_time" content="2024-09-28T05:01:19.648Z">
+<meta property="article:author" content="Caelansar">
+<meta property="article:tag" content="rust">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2024/08/24/rust的魔法参数/"/>
+
+
+
+
+
+  <title>rust的魔法参数 | Caelansar</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Caelansar</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2024/08/24/rust%E7%9A%84%E9%AD%94%E6%B3%95%E5%8F%82%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/img.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Caelansar">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">rust的魔法参数</h1>
+        
+
+        <div class="post-meta">
+            
+
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2024-08-24T15:21:17+08:00">
+                2024-08-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/rust/" itemprop="url" rel="index">
+                    <span itemprop="name">rust</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>初看axum 时，对于它的<a target="_blank" rel="noopener" href="https://github.com/tokio-rs/axum?tab=readme-ov-file#usage-example">示例代码</a>惊为天人：一个静态强类型语言竟然可以做出比肩动态语言的效果，可以写出如此灵活，且做了严格类型检查的代码</p>
+<span id="more"></span>
+
+<p>不同于<a target="_blank" rel="noopener" href="https://github.com/actix/actix-web">actix-web</a>，<a target="_blank" rel="noopener" href="https://github.com/rwf2/Rocket">rocket</a>这些rust下的web框架，axum的路由处理设计并没有使用到过程宏。路由使用方式如下：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[tokio::main]</span></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> app = Router::new()</span><br><span class="line">        .route(<span class="string">&quot;/&quot;</span>, get(root))</span><br><span class="line">        .route(<span class="string">&quot;/:id&quot;</span>, get(get_user));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> listener = tokio::net::TcpListener::bind(<span class="string">&quot;0.0.0.0:3000&quot;</span>).<span class="keyword">await</span>.unwrap();</span><br><span class="line">    axum::serve(listener, app).<span class="keyword">await</span>.unwrap();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">fn</span> <span class="title">root</span></span>() -&gt; &amp;<span class="symbol">&#x27;static</span> <span class="built_in">str</span> &#123;</span><br><span class="line">    <span class="string">&quot;Hello, World!&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">fn</span> <span class="title">get_user</span></span>(Path(id): Path&lt;<span class="built_in">u64</span>&gt;) -&gt; (StatusCode, Json&lt;User&gt;) &#123;</span><br><span class="line">    <span class="keyword">let</span> user = User &#123;</span><br><span class="line">        id,</span><br><span class="line">        username: <span class="string">&quot;user&quot;</span>.to_string(),</span><br><span class="line">    &#125;;</span><br><span class="line">    (StatusCode::OK, Json(user))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>get</code>方法竟然可以接受<code>root</code>/<code>get_user</code>两个具有不同签名的函数，乍看之下属实使人匪夷所思</p>
+<p>继续阅读<code>route</code>方法的签名</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">route</span></span>(<span class="keyword">self</span>, path: &amp;<span class="built_in">str</span>, method_router: MethodRouter&lt;S&gt;) -&gt; <span class="keyword">Self</span> &#123;</span><br><span class="line">    <span class="keyword">self</span>.tap_inner_mut(|this| &#123;</span><br><span class="line">        panic_on_err!(this.path_router.route(path, method_router));</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>它接受<code>path</code> &amp; <code>method_router</code> 两个参数，那么<code>get(root)</code> &amp; <code>get(get_user)</code> 的类型一定是 <code>MethodRouter&lt;S&gt;</code></p>
+<p>进一步找到<code>get</code>方法的定义</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">get</span></span>&lt;H, T, S&gt;(handler: H) -&gt; MethodRouter&lt;S, Infallible&gt;</span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">    H: Handler&lt;T, S&gt;,</span><br><span class="line">    T: <span class="symbol">&#x27;static</span>,</span><br><span class="line">    S: <span class="built_in">Clone</span> + <span class="built_in">Send</span> + <span class="built_in">Sync</span> + <span class="symbol">&#x27;static</span>,</span><br><span class="line">&#123;</span><br><span class="line">    on(MethodFilter::GET</span><br><span class="line">       , handler)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以<code>get(root)</code> 会被展开为 <code>on(MethodFilter::GET, root)</code>，所以<code>root</code> / <code>get_user</code> 必然都实现了 <code>Handler&lt;T, S&gt;</code>，否则不能通过编译</p>
+<p><code>Handler</code> trait中最为重要的方法是call</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">call</span></span>(<span class="keyword">self</span>, req: Request, state: S) -&gt; Self::Future;</span><br></pre></td></tr></table></figure>
+<p>call方法要求handler实现 request -&gt; response的处理流程<br>对于无参的root方法，是通过以下代码实现，这在rust中称为blanket implementation：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span>&lt;F, Fut, Res, S&gt; Handler&lt;((),), S&gt; <span class="keyword">for</span> F</span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">    F: <span class="built_in">FnOnce</span>() -&gt; Fut + <span class="built_in">Clone</span> + <span class="built_in">Send</span> + <span class="symbol">&#x27;static</span>,</span><br><span class="line">    Fut: Future&lt;Output = Res&gt; + <span class="built_in">Send</span>,</span><br><span class="line">    Res: IntoResponse,</span><br><span class="line">&#123;</span><br><span class="line">    <span class="class"><span class="keyword">type</span> <span class="title">Future</span></span> = Pin&lt;<span class="built_in">Box</span>&lt;<span class="keyword">dyn</span> Future&lt;Output = Response&gt; + <span class="built_in">Send</span>&gt;&gt;;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">call</span></span>(<span class="keyword">self</span>, _req: Request, _state: S) -&gt; Self::Future &#123;</span><br><span class="line">        <span class="built_in">Box</span>::pin(<span class="keyword">async</span> <span class="keyword">move</span> &#123; <span class="keyword">self</span>().<span class="keyword">await</span>.into_response() &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于所有实现了 <code>FnOnce() -&gt; Fut + Clone + Send + &#39;static</code> 的类型，均实现了<code>Handler</code>，<code>root</code>函数实现了<code>FnOnce</code> trait，因而也实现了<code>Handler</code><br>对于1-16个参数的函数，axum通过过程宏提供了一个统一的逻辑：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> impl_handler &#123;</span><br><span class="line">    (</span><br><span class="line">        [$($ty:ident),*], $last:ident</span><br><span class="line">    ) =&gt; &#123;</span><br><span class="line">        <span class="meta">#[allow(non_snake_case, unused_mut)]</span></span><br><span class="line">        <span class="keyword">impl</span>&lt;F, Fut, S, Res, M, $($ty,)* $last&gt; Handler&lt;(M, $($ty,)* $last,), S&gt; <span class="keyword">for</span> F</span><br><span class="line">        <span class="keyword">where</span></span><br><span class="line">            F: <span class="built_in">FnOnce</span>($($ty,)* $last,) -&gt; Fut + <span class="built_in">Clone</span> + <span class="built_in">Send</span> + <span class="symbol">&#x27;static</span>,</span><br><span class="line">            Fut: Future&lt;Output = Res&gt; + <span class="built_in">Send</span>,</span><br><span class="line">            S: <span class="built_in">Send</span> + <span class="built_in">Sync</span> + <span class="symbol">&#x27;static</span>,</span><br><span class="line">            Res: IntoResponse,</span><br><span class="line">            $( $ty: FromRequestParts&lt;S&gt; + <span class="built_in">Send</span>, )*</span><br><span class="line">            $last: FromRequest&lt;S, M&gt; + <span class="built_in">Send</span>,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="class"><span class="keyword">type</span> <span class="title">Future</span></span> = Pin&lt;<span class="built_in">Box</span>&lt;<span class="keyword">dyn</span> Future&lt;Output = Response&gt; + <span class="built_in">Send</span>&gt;&gt;;</span><br><span class="line"></span><br><span class="line">            <span class="function"><span class="keyword">fn</span> <span class="title">call</span></span>(<span class="keyword">self</span>, req: Request, state: S) -&gt; Self::Future &#123;</span><br><span class="line">                <span class="built_in">Box</span>::pin(<span class="keyword">async</span> <span class="keyword">move</span> &#123;</span><br><span class="line">                    <span class="keyword">let</span> (<span class="keyword">mut</span> parts, body) = req.into_parts();</span><br><span class="line">                    <span class="keyword">let</span> state = &amp;state;</span><br><span class="line"></span><br><span class="line">                    $(</span><br><span class="line">                        <span class="keyword">let</span> $ty = <span class="keyword">match</span> $ty::from_request_parts(&amp;<span class="keyword">mut</span> parts, state).<span class="keyword">await</span> &#123;</span><br><span class="line">                            <span class="literal">Ok</span>(value) =&gt; value,</span><br><span class="line">                            <span class="literal">Err</span>(rejection) =&gt; <span class="keyword">return</span> rejection.into_response(),</span><br><span class="line">                        &#125;;</span><br><span class="line">                    )*</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">let</span> req = Request::from_parts(parts, body);</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">let</span> $last = <span class="keyword">match</span> $last::from_request(req, state).<span class="keyword">await</span> &#123;</span><br><span class="line">                        <span class="literal">Ok</span>(value) =&gt; value,</span><br><span class="line">                        <span class="literal">Err</span>(rejection) =&gt; <span class="keyword">return</span> rejection.into_response(),</span><br><span class="line">                    &#125;;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">let</span> res = <span class="keyword">self</span>($($ty,)* $last,).<span class="keyword">await</span>;</span><br><span class="line"></span><br><span class="line">                    res.into_response()</span><br><span class="line">                &#125;)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$(</span><br><span class="line">    <span class="keyword">let</span> $ty = <span class="keyword">match</span> $ty::from_request_parts(&amp;<span class="keyword">mut</span> parts, state).<span class="keyword">await</span> &#123;</span><br><span class="line">        <span class="literal">Ok</span>(value) =&gt; value,</span><br><span class="line">        <span class="literal">Err</span>(rejection) =&gt; <span class="keyword">return</span> rejection.into_response(),</span><br><span class="line">    &#125;;</span><br><span class="line">)*</span><br></pre></td></tr></table></figure>
+<p>是对每个 <code>$ty</code>（T1, T2, …）依次调用 <code>from_request_parts()</code>，得到 handler 需要的变量<br>还可以发现，<code>impl_handler</code>，对于最后一个参数<code>$last</code>进行了区分处理，之前的参数要求实现**<a target="_blank" rel="noopener" href="https://docs.rs/axum/latest/axum/extract/trait.FromRequestParts.html">FromRequestParts</a>**，最后一个参数要求实现 <strong><a target="_blank" rel="noopener" href="https://docs.rs/axum/latest/axum/extract/trait.FromRequest.html">FromRequest</a><strong>。这两个trait的区别在于实现<code>FromRequestParts</code> 的extractor不会消耗request的body，在handler中可以按任意顺序排列，而<code>FromRequest</code>会消耗request body，在handler中只能执行一次。所以像Json<T> 这样的类型只能作为函数的</strong>最后</strong>一个参数</p>
+<p>blanket implementation这个特性是axum能够实现魔法参数的核心。其实像给函数实现接口这种设计，在其他语言也颇为常见，比如golang的<a target="_blank" rel="noopener" href="https://pkg.go.dev/net/http#HandlerFunc">HandlerFunc</a>，但由于其没有blanket implementation，<code>HandlerFunc</code>只能接受固定的<a target="_blank" rel="noopener" href="https://pkg.go.dev/net/http#ResponseWriter">ResponseWriter</a>和<del><a target="_blank" rel="noopener" href="https://pkg.go.dev/net/http#Request">Request</a></del><br>两个参数，无法像axum这样自由灵活的对handler参数进行组合</p>
+<p>分析完request，可以举一反三的理解response。和response相关的trait是 <code>IntoResponse</code></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="class"><span class="keyword">trait</span> <span class="title">IntoResponse</span></span> &#123;</span><br><span class="line">    <span class="comment">/// Create a response.</span></span><br><span class="line">    <span class="meta">#[must_use]</span></span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">into_response</span></span>(<span class="keyword">self</span>) -&gt; Response;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 axum 中，很多类型都已经实现了 <code>IntoResponse</code> trait，包括 <code>&amp;’static str</code> 和 <code>Json&lt;T&gt;</code>。<code>get_user</code> 返回的 <code>（StatusCode, Json&lt;User&gt;）</code> 同样也实现了它:</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span>&lt;R&gt; IntoResponse <span class="keyword">for</span> (StatusCode, R)</span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">    R: IntoResponse,</span><br><span class="line">&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">into_response</span></span>(<span class="keyword">self</span>) -&gt; Response &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> res = <span class="keyword">self</span>.<span class="number">1</span>.into_response();</span><br><span class="line">        *res.status_mut() = <span class="keyword">self</span>.<span class="number">0</span>;</span><br><span class="line">        res</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>通过trait + macros + blanket implement，可以在保持静态检查及安全性的同时，大大提升用户代码的灵活性、易用性以及可组合性。不使用过程宏来实现路由处理，也方便了用户在测试时只需关注一个个独立的handler function。但凡事皆有两面，基于泛型的抽象设计带来极大灵活性的同时，也增加了错误消息的复杂度。如果输入的参数不符合 FromRequestParts / FromRequest trait，那么，axum 编译期产生的错误会非常晦涩难懂，为此axum还专门提供了<a target="_blank" rel="noopener" href="https://docs.rs/axum/latest/axum/attr.debug_handler.html">debug_handler macro</a>帮助排查此类问题</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/rust/" rel="tag"># rust</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/03/26/%E4%BD%BF%E7%94%A8lldb%E6%8E%A2%E7%B4%A2trait-object%E7%9A%84%E7%BB%93%E6%9E%84/" rel="next" title="使用lldb探索trait object的结构">
+                <i class="fa fa-chevron-left"></i> 使用lldb探索trait object的结构
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2024/09/05/rust%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0/" rel="prev" title="rust中的「函数」">
+                rust中的「函数」 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/img.png"
+                alt="" />
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Caelansar</span>
+
+  
+</div>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

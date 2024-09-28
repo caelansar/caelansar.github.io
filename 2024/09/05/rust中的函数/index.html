@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="rust," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Function Item第一次接触到function item这个新概念可能会令人感到困惑，因为在其它语言中几乎都找不到类似的设计，但它却是 Rust 零成本抽象（zero-overhead abstractions）的一个重要体现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rust中的「函数」">
+<meta property="og:url" content="http://yoursite.com/2024/09/05/rust%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0/index.html">
+<meta property="og:site_name" content="Caelansar">
+<meta property="og:description" content="Function Item第一次接触到function item这个新概念可能会令人感到困惑，因为在其它语言中几乎都找不到类似的设计，但它却是 Rust 零成本抽象（zero-overhead abstractions）的一个重要体现">
+<meta property="og:locale">
+<meta property="article:published_time" content="2024-09-05T02:18:23.000Z">
+<meta property="article:modified_time" content="2024-09-28T05:06:54.137Z">
+<meta property="article:author" content="Caelansar">
+<meta property="article:tag" content="rust">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2024/09/05/rust中的函数/"/>
+
+
+
+
+
+  <title>rust中的「函数」 | Caelansar</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Caelansar</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2024/09/05/rust%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/img.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Caelansar">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">rust中的「函数」</h1>
+        
+
+        <div class="post-meta">
+            
+                    <i class="fa fa-thumb-tack"></i>
+                    <font color=7D26CD>置顶</font>
+                    <span class="post-meta-divider">|</span>
+            
+
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2024-09-05T10:18:23+08:00">
+                2024-09-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/rust/" itemprop="url" rel="index">
+                    <span itemprop="name">rust</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Function-Item"><a href="#Function-Item" class="headerlink" title="Function Item"></a>Function Item</h2><p>第一次接触到function item这个新概念可能会令人感到困惑，因为在其它语言中几乎都找不到类似的设计，但它却是 Rust 零成本抽象（zero-overhead abstractions）的一个重要体现</p>
+<span id="more"></span>
+
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#![feature(const_type_name)]</span></span><br><span class="line"><span class="meta">#![feature(const_size_of_val)]</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">use</span> std::&#123;any::type_name, mem&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="function"><span class="keyword">fn</span> <span class="title">type_name_of_val</span></span>&lt;T&gt;(_: &amp;T) -&gt; &amp;<span class="symbol">&#x27;static</span> <span class="built_in">str</span> &#123;</span><br><span class="line">    type_name::&lt;T&gt;()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="function"><span class="keyword">fn</span> <span class="title">size_of_val</span></span>&lt;T&gt;(t: &amp;T) -&gt; <span class="built_in">usize</span> &#123;</span><br><span class="line">    mem::size_of_val(t)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">add</span></span>(a: <span class="built_in">i32</span>, b: <span class="built_in">i32</span>) -&gt; <span class="built_in">i32</span> &#123;</span><br><span class="line">    a + b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">sub</span></span>(a: <span class="built_in">i32</span>, b: <span class="built_in">i32</span>) -&gt; <span class="built_in">i32</span> &#123;</span><br><span class="line">    a - b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;add size: &#123;&#125;&quot;</span>, size_of_val(&amp;add)); <span class="comment">// 0</span></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;sub size: &#123;&#125;&quot;</span>, size_of_val(&amp;sub)); <span class="comment">// 0</span></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;add type: &#123;&#125;&quot;</span>, type_name_of_val(&amp;add)); <span class="comment">// func::add</span></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;sub type: &#123;&#125;&quot;</span>, type_name_of_val(&amp;sub)); <span class="comment">// func::sub</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述代码中的 <code>add</code> &amp; <code>sub</code>就是function item，它们的size都为0，类型分别为 <code>func::add</code> &amp; <code>func::sub</code> （<code>func</code>是crate name）</p>
+<p>如果按照其它语言中对「函数」这一概念的惯性思维，我们可能会编写出如下的代码：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> f = add;</span><br><span class="line">f = sub; <span class="comment">//~ ERROR mismatched types</span></span><br></pre></td></tr></table></figure>
+
+<p>但它并不能通过编译。这是由于function item直接表示函数本身，虽然它们具有相同的函数签名，但实际是两个不同的类型。由此我们也能窥见Rust中对于「函数」的谁急似乎和其他语言存在着差异</p>
+<h2 id="Function-Pointer"><a href="#Function-Pointer" class="headerlink" title="Function Pointer"></a>Function Pointer</h2><p>function pointer和 function item的区别可以概括为：function pointer通过存储的地址引用函数；function item通过类型信息定位函数</p>
+<p>可以将具有相同函数签名的function item强转（coerce）为function pointer，来支持改变<code>f</code>的指向：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> f: <span class="function"><span class="keyword">fn</span></span>(<span class="built_in">i32</span>, <span class="built_in">i32</span>) -&gt; <span class="built_in">i32</span> = add;</span><br><span class="line">f = sub;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>下面通过一个完整例子探索一下function item &amp; function pointer</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[inline(never)]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">add</span></span>(a: <span class="built_in">i32</span>, b: <span class="built_in">i32</span>) -&gt; <span class="built_in">i32</span> &#123;</span><br><span class="line">    a + b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[inline(never)]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">sub</span></span>(a: <span class="built_in">i32</span>, b: <span class="built_in">i32</span>) -&gt; <span class="built_in">i32</span> &#123;</span><br><span class="line">    a - b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> item = sub; <span class="comment">// function item</span></span><br><span class="line">    <span class="keyword">let</span> item1 = sub; <span class="comment">// function item</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> ptr: <span class="function"><span class="keyword">fn</span></span>(<span class="built_in">i32</span>, <span class="built_in">i32</span>) -&gt; <span class="built_in">i32</span> = add; <span class="comment">// function pointer</span></span><br><span class="line">    <span class="keyword">let</span> ptr1: <span class="function"><span class="keyword">fn</span></span>(<span class="built_in">i32</span>, <span class="built_in">i32</span>) -&gt; <span class="built_in">i32</span> = sub; <span class="comment">// function pointer</span></span><br><span class="line">    <span class="keyword">let</span> x = item(<span class="number">2</span>, <span class="number">2</span>);</span><br><span class="line">    <span class="keyword">let</span> y = item1(<span class="number">2</span>, <span class="number">2</span>);</span><br><span class="line">    <span class="keyword">let</span> z = ptr(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">    ptr = sub;</span><br><span class="line">    <span class="keyword">let</span> a = ptr(<span class="number">2</span>, <span class="number">2</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用<code>rust-lldb</code>，在第19行处打一个断点，然后运行至断点处打印变量观察：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">(lldb) v</span><br><span class="line">(int (*)(int, int)) item = 0x0001000017ac0000</span><br><span class="line">(int (*)(int, int)) item1 = 0x000001000017ac00</span><br><span class="line">(int (*)(int, int)) ptr = 0x00000001000017ac (main`main::add::h243b87047811e43e at main.rs:2)</span><br><span class="line">(int (*)(int, int)) ptr1 = 0x00000001000017f0 (main`main::sub::hdca0f0b5bfd66359 at main.rs:7)</span><br><span class="line">(int) x = 0</span><br><span class="line">(int) y = 0</span><br><span class="line">(int) z = 3</span><br></pre></td></tr></table></figure>
+
+<p><code>item</code> 和 <code>item1</code> 是function item type，虽然lldb这里输出了地址，但是如果尝试访问会发现它是无效地址，可能是<code>lldb</code>无法识别function item（可以看到这里标注的类型还是<code>(int (*)(int, int))</code> 这种函数指针类型），也可能是调试信息的中间产物，故忽略</p>
+<p>主要注意<code>ptr</code>和<code>ptr1</code>，它们分别指向<code>0x00000001000017ac</code> 和 <code>0x00000001000017f0</code>，对这两个地址进行反汇编：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">(lldb) disassemble -s 0x00000001000017ac</span><br><span class="line">main`main::add::h243b87047811e43e:</span><br><span class="line">    0x1000017ac &lt;+0&gt;:  sub    sp, sp, #0x20</span><br><span class="line">    0x1000017b0 &lt;+4&gt;:  stp    x29, x30, [sp, #0x10]</span><br><span class="line">    0x1000017b4 &lt;+8&gt;:  add    x29, sp, #0x10</span><br><span class="line">    0x1000017b8 &lt;+12&gt;: str    w0, [sp, #0x8]</span><br><span class="line">    0x1000017bc &lt;+16&gt;: stur   w1, [x29, #-0x4]</span><br><span class="line">    0x1000017c0 &lt;+20&gt;: adds   w8, w0, w1</span><br><span class="line">    0x1000017c4 &lt;+24&gt;: str    w8, [sp, #0x4]</span><br><span class="line">    0x1000017c8 &lt;+28&gt;: cset   w8, vs</span><br><span class="line">(lldb) disassemble -s 0x00000001000017f0</span><br><span class="line">main`main::sub::hdca0f0b5bfd66359:</span><br><span class="line">    0x1000017f0 &lt;+0&gt;:  sub    sp, sp, #0x20</span><br><span class="line">    0x1000017f4 &lt;+4&gt;:  stp    x29, x30, [sp, #0x10]</span><br><span class="line">    0x1000017f8 &lt;+8&gt;:  add    x29, sp, #0x10</span><br><span class="line">    0x1000017fc &lt;+12&gt;: str    w0, [sp, #0x8]</span><br><span class="line">    0x100001800 &lt;+16&gt;: stur   w1, [x29, #-0x4]</span><br><span class="line">    0x100001804 &lt;+20&gt;: subs   w8, w0, w1</span><br><span class="line">    0x100001808 &lt;+24&gt;: str    w8, [sp, #0x4]</span><br><span class="line">    0x10000180c &lt;+28&gt;: cset   w8, vs</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>可以看到它们指向的正是<code>add</code> &amp; <code>sub</code> 函数的入口地址，因此可以得出结论：function pointer 本质就是一个指针，内部指向一个函数的地址</p>
+<p>当程序执行完 <code>ptr = sub;</code> 语句后，再次打印变量:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(int (*)(int, int)) ptr = 0x00000001000017f0 (main`main::sub::hdca0f0b5bfd66359 at main.rs:7)</span><br><span class="line">(int (*)(int, int)) ptr1 = 0x00000001000017f0 (main`main::sub::hdca0f0b5bfd66359 at main.rs:7)</span><br></pre></td></tr></table></figure>
+
+<p>此时<code>ptr</code> &amp; <code>ptr1</code> 都指向<code>sub</code>的入口地址<code>0x00000001000017f0</code></p>
+<p>为了更进一步理解，可以对<code>main</code>函数进行反汇编：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">(lldb) disassemble -n main</span><br><span class="line">main`main::main::h8d79616f9b6b86ce:</span><br><span class="line">    0x100001834 &lt;+0&gt;:   sub    sp, sp, #0x40</span><br><span class="line">    0x100001838 &lt;+4&gt;:   stp    x29, x30, [sp, #0x30]</span><br><span class="line">    0x10000183c &lt;+8&gt;:   add    x29, sp, #0x30</span><br><span class="line">    0x100001840 &lt;+12&gt;:  adrp   x8, 0</span><br><span class="line">    0x100001844 &lt;+16&gt;:  add    x8, x8, #0x7ac            ; main::add::h243b87047811e43e at main.rs:2</span><br><span class="line">    0x100001848 &lt;+20&gt;:  str    x8, [sp, #0x10]</span><br><span class="line">    0x10000184c &lt;+24&gt;:  adrp   x8, 0</span><br><span class="line">    0x100001850 &lt;+28&gt;:  add    x8, x8, #0x7f0            ; main::sub::hdca0f0b5bfd66359 at main.rs:7</span><br><span class="line">    0x100001854 &lt;+32&gt;:  str    x8, [sp]</span><br><span class="line">    0x100001858 &lt;+36&gt;:  str    x8, [sp, #0x18]</span><br><span class="line">    0x10000185c &lt;+40&gt;:  mov    w1, #0x2</span><br><span class="line">    0x100001860 &lt;+44&gt;:  str    w1, [sp, #0x8]</span><br><span class="line">    0x100001864 &lt;+48&gt;:  mov    x0, x1</span><br><span class="line">    0x100001868 &lt;+52&gt;:  bl     0x1000017ac               ; main::add::h243b87047811e43e at main.rs:2</span><br><span class="line">    0x10000186c &lt;+56&gt;:  ldr    w1, [sp, #0x8]</span><br><span class="line">    0x100001870 &lt;+60&gt;:  stur   w0, [x29, #-0x10]</span><br><span class="line">    0x100001874 &lt;+64&gt;:  mov    x0, x1</span><br><span class="line">    0x100001878 &lt;+68&gt;:  bl     0x1000017f0               ; main::sub::hdca0f0b5bfd66359 at main.rs:7</span><br><span class="line">    0x10000187c &lt;+72&gt;:  ldr    w1, [sp, #0x8]</span><br><span class="line">    0x100001880 &lt;+76&gt;:  stur   w0, [x29, #-0xc]</span><br><span class="line">    0x100001884 &lt;+80&gt;:  ldr    x8, [sp, #0x10]</span><br><span class="line">    0x100001888 &lt;+84&gt;:  mov    w0, #0x1</span><br><span class="line">    0x10000188c &lt;+88&gt;:  blr    x8</span><br><span class="line">    0x100001890 &lt;+92&gt;:  ldr    x8, [sp]</span><br><span class="line">    0x100001894 &lt;+96&gt;:  ldr    w1, [sp, #0x8]</span><br><span class="line">    0x100001898 &lt;+100&gt;: stur   w0, [x29, #-0x8]</span><br><span class="line">    0x10000189c &lt;+104&gt;: str    x8, [sp, #0x10]</span><br><span class="line">-&gt;  0x1000018a0 &lt;+108&gt;: ldr    x8, [sp, #0x10]</span><br><span class="line">    0x1000018a4 &lt;+112&gt;: mov    x0, x1</span><br><span class="line">    0x1000018a8 &lt;+116&gt;: blr    x8</span><br><span class="line">    0x1000018ac &lt;+120&gt;: stur   w0, [x29, #-0x4]</span><br><span class="line">    0x1000018b0 &lt;+124&gt;: ldp    x29, x30, [sp, #0x30]</span><br><span class="line">    0x1000018b4 &lt;+128&gt;: add    sp, sp, #0x40</span><br><span class="line">    0x1000018b8 &lt;+132&gt;: ret    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>由于我使用的是Apple芯片的mac，这里输出的是arm汇编，和amd汇编还是有较大区别，但这不妨碍我们挑重点进行阅读：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0x100001844 &lt;+16&gt;:  add    x8, x8, #0x7ac            ; main::add::h243b87047811e43e at main.rs:2</span><br><span class="line">0x100001848 &lt;+20&gt;:  str    x8, [sp, #0x10]</span><br><span class="line">0x10000184c &lt;+24&gt;:  adrp   x8, 0</span><br><span class="line">0x100001850 &lt;+28&gt;:  add    x8, x8, #0x7f0            ; main::sub::hdca0f0b5bfd66359 at main.rs:7</span><br><span class="line">0x100001854 &lt;+32&gt;:  str    x8, [sp]</span><br></pre></td></tr></table></figure>
+
+<p>把<code>0x7ac</code>（<code>add</code>的地址）存储在栈空间偏移 <code>0x10</code>处；把<code>0x7f0</code>（<code>sub</code>的地址）存储在栈空间<code>sp</code>处</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0x100001868 &lt;+52&gt;:  bl     0x1000017ac               ; main::add::h243b87047811e43e at main.rs:2</span><br><span class="line">0x100001878 &lt;+68&gt;:  bl     0x1000017f0               ; main::sub::hdca0f0b5bfd66359 at main.rs:7</span><br></pre></td></tr></table></figure>
+
+<p>这两条语句对应的是<code>item(2, 2)</code> &amp; <code>item1(2, 2)</code>的调用，可以看到这里是直接拿到了对应的函数地址进行执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0x100001884 &lt;+80&gt;:  ldr    x8, [sp, #0x10]</span><br><span class="line">0x100001888 &lt;+84&gt;:  mov    w0, #0x1</span><br><span class="line">0x10000188c &lt;+88&gt;:  blr    x8</span><br></pre></td></tr></table></figure>
+
+<p>从栈的偏移量<code>0x10</code>处加载函数地址到<code>x8</code>，所以<code>x8</code>当前保存的是<code>add</code>的地址，之后通过<code>blr</code>指令跳转到<code>x8</code>存储的地址并执行，对应<code>ptr(1,2)</code>的调用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">0x100001890 &lt;+92&gt;:  ldr    x8, [sp]</span><br><span class="line">0x100001894 &lt;+96&gt;:  ldr    w1, [sp, #0x8]</span><br><span class="line">0x100001898 &lt;+100&gt;: stur   w0, [x29, #-0x8]</span><br><span class="line">0x10000189c &lt;+104&gt;: str    x8, [sp, #0x10]</span><br><span class="line">0x1000018a0 &lt;+108&gt;: ldr    x8, [sp, #0x10]</span><br><span class="line">0x1000018a4 &lt;+112&gt;: mov    x0, x1</span><br><span class="line">0x1000018a8 &lt;+116&gt;: blr    x8</span><br></pre></td></tr></table></figure>
+
+<p>从栈顶加载<code>sub</code>函数地址到x8，<code>str x8, [sp, #0x10]</code> <code>ldr x8, [sp, #0x10]</code> 这两句看着有些费解，先将x8的地址保存在偏移量<code>0x10</code>处，又从偏移量<code>0x10</code>处再次加载函数地址到<code>x8</code>，猜测和未开启编译优化有关。最后还是通过blr指令跳转执行，对应<code>ptr</code>重新赋值为<code>sub</code>后，<code>ptr(2,2)</code>的调用</p>
+<p>和直接跳转地址相比，可以发现<code>blr x8</code>这种调用方式多了一层寻址操作</p>
+<h2 id="Closure"><a href="#Closure" class="headerlink" title="Closure"></a>Closure</h2><p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Closure_(computer_programming)">闭包</a>是将函数，或者说代码和其环境一起存储的一种数据结构。闭包引用的上下文中的自由变量，会被捕获到闭包的结构中，成为闭包类型的一部分。在 Rust 中，闭包可以用 <code>|args| &#123;code&#125;</code> 来表示。写段代码探索一下Rust的闭包：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::&#123;collections::HashMap, mem::size_of_val&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="comment">// 长度为 0</span></span><br><span class="line">    <span class="keyword">let</span> c1 = || <span class="built_in">println!</span>(<span class="string">&quot;hello world!&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 和参数无关，长度也为 0</span></span><br><span class="line">    <span class="keyword">let</span> c2 = |i: <span class="built_in">i32</span>| <span class="built_in">println!</span>(<span class="string">&quot;hello: &#123;&#125;&quot;</span>, i);</span><br><span class="line">    <span class="keyword">let</span> name = <span class="built_in">String</span>::from(<span class="string">&quot;cae&quot;</span>);</span><br><span class="line">    <span class="keyword">let</span> name1 = name.clone();</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> table = HashMap::new();</span><br><span class="line">    table.insert(<span class="string">&quot;hello&quot;</span>, <span class="string">&quot;world&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果捕获一个引用，长度为 8</span></span><br><span class="line">    <span class="keyword">let</span> c3 = || <span class="built_in">println!</span>(<span class="string">&quot;hello: &#123;&#125;&quot;</span>, name);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 捕获移动的数据 name1(长度 24) + table(长度 48)，closure 长度 72</span></span><br><span class="line">    <span class="keyword">let</span> c4 = <span class="keyword">move</span> || <span class="built_in">println!</span>(<span class="string">&quot;hello: &#123;&#125;, &#123;:?&#125;&quot;</span>, name1, table);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> name2 = name.clone();</span><br><span class="line">    <span class="comment">// 和局部变量无关，通过move捕获了一个 String name2，closure 长度 24</span></span><br><span class="line">    <span class="keyword">let</span> c5 = <span class="keyword">move</span> || &#123;</span><br><span class="line">        <span class="keyword">let</span> x = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">let</span> name3 = <span class="built_in">String</span>::from(<span class="string">&quot;lindsey&quot;</span>);</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;hello: &#123;&#125;, &#123;:?&#125;, &#123;:?&#125;&quot;</span>, x, name2, name3);</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">println!</span>(</span><br><span class="line">        <span class="string">&quot;c1: &#123;&#125;\nc2: &#123;&#125;\nc3: &#123;&#125;\nc4: &#123;&#125;\nc5: &#123;&#125;\nmain: &#123;&#125;&quot;</span>,</span><br><span class="line">        size_of_val(&amp;c1),</span><br><span class="line">        size_of_val(&amp;c2),</span><br><span class="line">        size_of_val(&amp;c3),</span><br><span class="line">        size_of_val(&amp;c4),</span><br><span class="line">        size_of_val(&amp;c5),</span><br><span class="line">        size_of_val(&amp;main),</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以发现：closure的大小跟<strong>参数</strong>、<strong>局部变量</strong>都无关，只跟<strong>捕获的变量</strong>有关。</p>
+<p>通过<code>rust-lldb</code>设置断点，观察各个变量的结构：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line">(lldb) v</span><br><span class="line">(main::main::&#123;closure_env#0&#125;) c1 =</span><br><span class="line">(main::main::&#123;closure_env#1&#125;) c2 =</span><br><span class="line">(alloc::string::String) name = &quot;cae&quot; &#123;</span><br><span class="line">  vec = size=3 &#123;</span><br><span class="line">    [0] = &#x27;c&#x27;</span><br><span class="line">    [1] = &#x27;a&#x27;</span><br><span class="line">    [2] = &#x27;e&#x27;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">(alloc::string::String) name1 = &quot;cae&quot; &#123;</span><br><span class="line">  vec = size=3 &#123;</span><br><span class="line">    [0] = &#x27;c&#x27;</span><br><span class="line">    [1] = &#x27;a&#x27;</span><br><span class="line">    [2] = &#x27;e&#x27;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">(std::collections::hash::map::HashMap&lt;&amp;str, &amp;str, std::hash::random::RandomState&gt;) table = size=1 &#123;</span><br><span class="line">  [0] = &#123;</span><br><span class="line">    0 = &quot;hello&quot; &#123;</span><br><span class="line">      [0] = &#x27;h&#x27;</span><br><span class="line">      [1] = &#x27;e&#x27;</span><br><span class="line">      [2] = &#x27;l&#x27;</span><br><span class="line">      [3] = &#x27;l&#x27;</span><br><span class="line">      [4] = &#x27;o&#x27;</span><br><span class="line">    &#125;</span><br><span class="line">    1 = &quot;world&quot; &#123;</span><br><span class="line">      [0] = &#x27;w&#x27;</span><br><span class="line">      [1] = &#x27;o&#x27;</span><br><span class="line">      [2] = &#x27;r&#x27;</span><br><span class="line">      [3] = &#x27;l&#x27;</span><br><span class="line">      [4] = &#x27;d&#x27;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">(main::main::&#123;closure_env#2&#125;) c3 = &#123;</span><br><span class="line">  _ref__name = 0x000000016fdfea68</span><br><span class="line">&#125;</span><br><span class="line">(main::main::&#123;closure_env#3&#125;) c4 = &#123;</span><br><span class="line">  name1 = &quot;cae&quot; &#123;</span><br><span class="line">    vec = size=3 &#123;</span><br><span class="line">      [0] = &#x27;c&#x27;</span><br><span class="line">      [1] = &#x27;a&#x27;</span><br><span class="line">      [2] = &#x27;e&#x27;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  table = size=1 &#123;</span><br><span class="line">    [0] = &#123;</span><br><span class="line">      0 = &quot;hello&quot; &#123;</span><br><span class="line">        [0] = &#x27;h&#x27;</span><br><span class="line">        [1] = &#x27;e&#x27;</span><br><span class="line">        [2] = &#x27;l&#x27;</span><br><span class="line">        [3] = &#x27;l&#x27;</span><br><span class="line">        [4] = &#x27;o&#x27;</span><br><span class="line">      &#125;</span><br><span class="line">      1 = &quot;world&quot; &#123;</span><br><span class="line">        [0] = &#x27;w&#x27;</span><br><span class="line">        [1] = &#x27;o&#x27;</span><br><span class="line">        [2] = &#x27;r&#x27;</span><br><span class="line">        [3] = &#x27;l&#x27;</span><br><span class="line">        [4] = &#x27;d&#x27;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">(alloc::string::String) name2 = &quot;cae&quot; &#123;</span><br><span class="line">  vec = size=3 &#123;</span><br><span class="line">    [0] = &#x27;c&#x27;</span><br><span class="line">    [1] = &#x27;a&#x27;</span><br><span class="line">    [2] = &#x27;e&#x27;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">(main::main::&#123;closure_env#4&#125;) c5 = &#123;</span><br><span class="line">  name2 = &quot;cae&quot; &#123;</span><br><span class="line">    vec = size=3 &#123;</span><br><span class="line">      [0] = &#x27;c&#x27;</span><br><span class="line">      [1] = &#x27;a&#x27;</span><br><span class="line">      [2] = &#x27;e&#x27;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主要观察几个长度不为 0 闭包内存里存放的数据是什么。从输出可以看出<code>c3</code>中的 <code>_ref__name</code> 字段是一个引用，指向地址为 <code>0x000000016fdfea68</code> 的数据。继续看看这个地址里存的数据是什么：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(lldb) x/3xg 0x000000016fdfea68</span><br><span class="line">0x16fdfea68: 0x0000000000000003 0x00006000015cc000</span><br><span class="line">0x16fdfea78: 0x0000000000000003</span><br></pre></td></tr></table></figure>
+
+<p>Rust 的<code>String</code>在内存中表示为<code>ptr | cap | len</code>的结构，因此在内存中占用3个words。由于编译器内存重排，导致输出顺序和逻辑位置有些差异。其中，<code>ptr</code>指向了具体的数据：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(lldb) x/c 0x00006000015cc000</span><br><span class="line">0x6000015cc000: cae\0\0\0\0\0</span><br></pre></td></tr></table></figure>
+
+<p>closure 类型是由编译器生成的匿名数据类型，故无法在代码标注具体类型。对于closure来说，编译器知道像函数一样调用闭包 <code>c4()</code> 是合法的，并且知道执行 <code>c4()</code> 时，代码应该跳转到什么地址来执行。在执行过程中，如果遇到自由变量，可以从自己的数据结构中获取。从<code>rust-lldb</code> 的输出可得，closure是存储在<strong>栈</strong>上，并且除了捕获的数据外，closure本身<strong>不包含</strong>任何额外函数指针指向闭包的代码，至于在调用时跳转到哪个地址，是由编译器在编译期静态生成。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> closure = |a: <span class="built_in">i32</span>, b: <span class="built_in">i32</span>| a + b;</span><br><span class="line">closure = |a, b| a * b; <span class="comment">//~ ERROR mismatched types</span></span><br></pre></td></tr></table></figure>
+
+<p>和function item类似，具有相同签名的closure并不是同一个类型。所以上述代码并不能够编译</p>
+<p>通过为每个 closure 生成一个匿名类型，使得调用闭包时可以直接和代码一一对应，省去了使用函数指针再次寻址的额外消耗。这种方式比起golang的[function value](<a target="_blank" rel="noopener" href="https://caelansar.github.io/2022/04/10/golang%E4%B8%AD%E7%9A%84function%20value/">golang中的function value | Caelansar</a>)二级指针的设计不知道高到哪里去了🤷</p>
+<h2 id="价值"><a href="#价值" class="headerlink" title="价值"></a>价值</h2><p>说了这么多，我们已经理解了Rust对于「函数」的设计，至于为什么这么设计，就让我们结合一个实际例子来看看这些设计所带来的实际价值</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[inline(never)]</span></span><br><span class="line"><span class="meta">#[no_mangle]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">calculate</span></span>&lt;F&gt;(f: F) -&gt; <span class="built_in">i32</span></span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">    F: <span class="built_in">FnMut</span>(<span class="built_in">i32</span>) -&gt; <span class="built_in">i32</span>,</span><br><span class="line">&#123;</span><br><span class="line">    (<span class="number">0</span>..<span class="number">5</span>).map(f).sum()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[no_mangle]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">f</span></span>(x: <span class="built_in">i32</span>) -&gt; <span class="built_in">i32</span> &#123;</span><br><span class="line">    x + x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[no_mangle]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">call</span></span>() -&gt; <span class="built_in">i32</span> &#123;</span><br><span class="line">    calculate(f)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>calculate</code> 函数的作用是使用传入的 <code>f</code> 对range <code>(0..5)</code> 中的每个值进行运算，再将结果累加返回。只要实现了 <code>FnMut(i32) -&gt; i32</code> 的类型，都可以作为参数传入<code>calculate</code>，将函数作为参数的写法在函数作为一等公民的语言中很常见，但Rust在这背后实际上通过单态化（monomorphization）实现了对<code>f</code>的静态派发（static dispatch）</p>
+<p>通过 <code>cargo rustc --release -- --emit asm</code> 输出汇编代码</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">        <span class="meta">.section</span>        __TEXT,__text,regular,pure_instructions</span><br><span class="line">        .build_version macos, <span class="number">11</span>, <span class="number">0</span></span><br><span class="line">        .p2align        <span class="number">2</span></span><br><span class="line"><span class="symbol">_calculate:</span></span><br><span class="line">        .cfi_startproc</span><br><span class="line">        <span class="keyword">mov</span>     w0, <span class="number">#20</span></span><br><span class="line">        ret</span><br><span class="line">        .cfi_endproc</span><br><span class="line"></span><br><span class="line">        .globl  _f</span><br><span class="line">        .p2align        <span class="number">2</span></span><br><span class="line"><span class="symbol">_f:</span></span><br><span class="line">        .cfi_startproc</span><br><span class="line">        <span class="keyword">lsl</span>     w0, w0, <span class="number">#1</span></span><br><span class="line">        ret</span><br><span class="line">        .cfi_endproc</span><br><span class="line"></span><br><span class="line">        .globl  _call</span><br><span class="line">        .p2align        <span class="number">2</span></span><br><span class="line"><span class="symbol">_call:</span></span><br><span class="line">        .cfi_startproc</span><br><span class="line">        <span class="keyword">b</span>       _calculate</span><br><span class="line">        .cfi_endproc</span><br><span class="line"></span><br><span class="line"><span class="symbol">.subsections_via_symbols</span></span><br></pre></td></tr></table></figure>
+
+<p>可以发现<code>calculate</code>函数直接在编译期完成了<code>map</code> &amp; <code>sum</code> 运算，直接得到了结果20<br>对代码稍作修改，新增f1 &amp; f2 函数，其中f1 和 f 完全一致，f2 和 f 逻辑一致</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[no_mangle]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">f1</span></span>(x: <span class="built_in">i32</span>) -&gt; <span class="built_in">i32</span> &#123;</span><br><span class="line">    x + x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[no_mangle]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">f2</span></span>(x: <span class="built_in">i32</span>) -&gt; <span class="built_in">i32</span> &#123;</span><br><span class="line">    x * <span class="number">2</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再次观察输出的汇编：</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">        <span class="meta">.section</span>        __TEXT,__text,regular,pure_instructions</span><br><span class="line">        .build_version macos, <span class="number">11</span>, <span class="number">0</span></span><br><span class="line">        .p2align        <span class="number">2</span></span><br><span class="line"><span class="symbol">_calculate:</span></span><br><span class="line">        .cfi_startproc</span><br><span class="line">        <span class="keyword">mov</span>     w0, <span class="number">#20</span></span><br><span class="line">        ret</span><br><span class="line">        .cfi_endproc</span><br><span class="line"></span><br><span class="line">        .globl  _f</span><br><span class="line">        .p2align        <span class="number">2</span></span><br><span class="line"><span class="symbol">_f:</span></span><br><span class="line">        .cfi_startproc</span><br><span class="line">        <span class="keyword">lsl</span>     w0, w0, <span class="number">#1</span></span><br><span class="line">        ret</span><br><span class="line">        .cfi_endproc</span><br><span class="line"></span><br><span class="line">        .globl  _call</span><br><span class="line">        .p2align        <span class="number">2</span></span><br><span class="line"><span class="symbol">_call:</span></span><br><span class="line">        .cfi_startproc</span><br><span class="line">        <span class="keyword">b</span>       _calculate</span><br><span class="line">        .cfi_endproc</span><br><span class="line"></span><br><span class="line">        .globl  _<span class="built_in">f1</span></span><br><span class="line"><span class="symbol">.set</span> _<span class="built_in">f1</span>, _f</span><br><span class="line">        .globl  _<span class="built_in">f2</span></span><br><span class="line"><span class="symbol">.set</span> _<span class="built_in">f2</span>, _f</span><br></pre></td></tr></table></figure>
+<p>可以发现，Rust<strong>并未</strong>对<code>f1</code> &amp; <code>f2</code>生成相应的汇编代码，只是将它们的值直接赋值为<code>f</code>。得益于单态化，Rust在编译期就能明确<code>f</code>究竟是什么，无论是function item或是closure背后的匿名结构体，都能通过静态派发为calculate的参数<code>f</code>提供足够的类型信息，也就避免了函数指针间接调用带来的开销，并进行更激进的优化</p>
+<p>你可能会好奇这个优化能带来多少性能提升。空口无凭，这时候就得进行benchmark对比看看<br>在Rust中，一般使用<a target="_blank" rel="noopener" href="https://crates.io/crates/criterion">criterion</a> 进行benchmark</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> criterion::&#123;black_box, criterion_group, criterion_main, Criterion&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[inline(never)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">calculate</span></span>&lt;F&gt;(f: F) -&gt; <span class="built_in">u128</span></span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">    F: <span class="built_in">FnMut</span>(<span class="built_in">u128</span>) -&gt; <span class="built_in">u128</span>,</span><br><span class="line">    F: <span class="built_in">Copy</span>,</span><br><span class="line">&#123;</span><br><span class="line">    (<span class="number">0</span>..<span class="number">1000000</span>).map(f).map(f).map(f).map(f).map(f).sum()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[inline(never)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">calculate_pointer</span></span>(f: <span class="function"><span class="keyword">fn</span></span>(<span class="built_in">u128</span>) -&gt; <span class="built_in">u128</span>) -&gt; <span class="built_in">u128</span> &#123;</span><br><span class="line">    (<span class="number">0</span>..<span class="number">1000</span>).map(f).map(f).map(f).map(f).map(f).sum()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">f</span></span>(x: <span class="built_in">u128</span>) -&gt; <span class="built_in">u128</span> &#123;</span><br><span class="line">    x + x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">f1</span></span>(x: <span class="built_in">u128</span>) -&gt; <span class="built_in">u128</span> &#123;</span><br><span class="line">    x * <span class="number">2</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">call</span></span>() -&gt; <span class="built_in">u128</span> &#123;</span><br><span class="line">    calculate(f);</span><br><span class="line"></span><br><span class="line">    calculate(f1)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">call_pointer</span></span>() -&gt; <span class="built_in">u128</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> fp: <span class="function"><span class="keyword">fn</span></span>(<span class="built_in">u128</span>) -&gt; <span class="built_in">u128</span> = f;</span><br><span class="line">    calculate_pointer(fp);</span><br><span class="line"></span><br><span class="line">    fp = f1;</span><br><span class="line">    calculate_pointer(fp)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">criterion_benchmark</span></span>(c: &amp;<span class="keyword">mut</span> Criterion) &#123;</span><br><span class="line">    c.bench_function(<span class="string">&quot;func item&quot;</span>, |b| &#123;</span><br><span class="line">        b.iter(|| &#123;</span><br><span class="line">            black_box(<span class="keyword">for</span> _ <span class="keyword">in</span> <span class="number">1</span>..=<span class="number">100</span> &#123;</span><br><span class="line">                black_box(call());</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    c.bench_function(<span class="string">&quot;func pointer&quot;</span>, |b| &#123;</span><br><span class="line">        b.iter(|| &#123;</span><br><span class="line">            black_box(<span class="keyword">for</span> _ <span class="keyword">in</span> <span class="number">1</span>..=<span class="number">100</span> &#123;</span><br><span class="line">                black_box(call_pointer());</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">criterion_group!(benches, criterion_benchmark);</span><br><span class="line">criterion_main!(benches);</span><br></pre></td></tr></table></figure>
+
+<p>注意这段代码：</p>
+<ul>
+<li><code>calculate</code> 和 <code>calculate_pointer</code>函数中map的执行次数不同，<code>calculate</code>中map的次数要多3个数量级，对于function item，编译器在编译期就能得到函数的所有信息，所以这里的数量级差异对性能影响为零</li>
+<li>定义了function pointer <code>mut fp: fn(u128) -&gt; u128</code> , 并在之后改变了它的指向，如果不进行修改操作，在fp指向未改变的情况下，编译器也会对它进行优化，完成和function item相同的编译期求值</li>
+</ul>
+<p>benchmark的结果为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">     Running benches/func.rs (target/release/deps/func-1b1df2d0b22f971a)</span><br><span class="line">Gnuplot not found, using plotters backend</span><br><span class="line">func item               time:   [147.79 ns 148.10 ns 148.42 ns]</span><br><span class="line">                        change: [-0.2788% +0.0758% +0.3918%] (p = 0.67 &gt; 0.05)</span><br><span class="line">                        No change in performance detected.</span><br><span class="line">Found 2 outliers among 100 measurements (2.00%)</span><br><span class="line">  1 (1.00%) high mild</span><br><span class="line">  1 (1.00%) high severe</span><br><span class="line"></span><br><span class="line">func pointer            time:   [633.96 µs 635.06 µs 636.35 µs]</span><br><span class="line">                        change: [-0.2078% +0.1107% +0.4070%] (p = 0.49 &gt; 0.05)</span><br><span class="line">                        No change in performance detected.</span><br><span class="line">Found 6 outliers among 100 measurements (6.00%)</span><br><span class="line">  4 (4.00%) high mild</span><br><span class="line">  2 (2.00%) high severe</span><br></pre></td></tr></table></figure>
+
+<p>可以看出相较于function pointer，function item 在性能上有数量级的领先，这还是在循环次数多了3个数量级的前提</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过对function item，function pointer，closure的讨论，我们可以得出：</p>
+<p>Rust通过</p>
+<ul>
+<li><p>使用所有权和借用机制，解决了内存归属问题有关。不用费劲分析捕获变量究竟是放在stack还是heap</p>
+</li>
+<li><p>提供<code>Fn/FnMut/FnOnce</code> trait，对<strong>函数调用</strong>这一行为定义了统一的抽象，function item，function pointer和closure能够<strong>像函数一样调用</strong>，仅仅因为他们实现了这些trait，而不是编译器借助函数地址施展的黑魔法</p>
+</li>
+<li><p>使用单态化，在编译期将泛型代码具体化为特定的类型实例，从而进行优化，在享受泛型灵活性的同时避免了运行时开销</p>
+</li>
+</ul>
+<p>当回归到最初的本质，一个好的设计所解决的不是单个问题，而是由此引发的所有问题。我们不必为堆内存管理设计GC，不必为资源的回收提供 <code>defer</code> 关键字，不必为并发安全进行诸多限制，也不必为闭包性能费尽心思优化</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://doc.rust-lang.org/reference/types/function-item.html">Function item types</a><br><a target="_blank" rel="noopener" href="https://doc.rust-lang.org/reference/types/function-pointer.html">Function pointer types</a><br><a target="_blank" rel="noopener" href="https://doc.rust-lang.org/std/primitive.fn.html">fn - Rust</a><br><a target="_blank" rel="noopener" href="https://dtolnay.github.io/rust-quiz/34">rust quiz</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/27895946/expected-fn-item-found-a-different-fn-item-when-working-with-function-pointer">“Expected fn item, found a different fn item” when working with function pointers</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/12934929/what-are-free-variables">javascript - What are free variables? - Stack Overflow</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/rust/" rel="tag"># rust</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2024/08/24/rust%E7%9A%84%E9%AD%94%E6%B3%95%E5%8F%82%E6%95%B0/" rel="next" title="rust的魔法参数">
+                <i class="fa fa-chevron-left"></i> rust的魔法参数
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/img.png"
+                alt="" />
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Function-Item"><span class="nav-number">1.</span> <span class="nav-text">Function Item</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Function-Pointer"><span class="nav-number">2.</span> <span class="nav-text">Function Pointer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Closure"><span class="nav-number">3.</span> <span class="nav-text">Closure</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%B7%E5%80%BC"><span class="nav-number">4.</span> <span class="nav-text">价值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Caelansar</span>
+
+  
+</div>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
